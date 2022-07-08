@@ -24,6 +24,9 @@
     var livesText;
     var lifeLostText;
 
+    var playing = false;
+    var startButton;
+
     
     function preload() {
         game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;//크기 비율 옵션. SHOW_ALL:가로세로 비율을 유지한 채 가득 채움
@@ -38,6 +41,8 @@
 
         //스프라이트 시트. 이미지의 단일프레임 넓이와 높이 지정해 스프라이트 프레임마다 다르게 호출. ball의 튕기는 효과를 표현 
         game.load.spritesheet('ball', 'img/wobble.png', 20, 20);
+
+        game.load.spritesheet('button', 'img/button.png', 120, 40);
     }
 
     function create() {
@@ -50,7 +55,7 @@
         game.physics.enable(ball, Phaser.Physics.ARCADE);//ball의 물리엔진 활성화
         ball.body.collideWorldBounds = true;//canvas요소 경계를 벽으로 취급
         ball.body.bounce.set(1);//충돌시 튀어오르게
-        ball.body.velocity.set(150, -150);//힘
+        //ball.body.velocity.set(150, -150);//힘
         //ball.body.gravity.y = 100;//중력
         
         ball.checkWorldBounds = true;
@@ -77,12 +82,17 @@
         lifeLostText.anchor.set(0.5);
         lifeLostText.visible = false;
 
+        startButton = game.add.button(game.world.width*0.5, game.world.height*0.5, 'button', startGame, this, 1, 0, 2);
+        startButton.anchor.set(0.5);
+
     }
     function update() {
         //game.physics.arcade.collide(ball, paddle);//ball과 paddle사이의 충돌감지 활성화
         game.physics.arcade.collide(ball, paddle, ballHitPaddle);
         game.physics.arcade.collide(ball, bricks, ballHitBrick);
-        paddle.x = game.input.x || game.world.width*0.5;
+        if(playing) {
+            paddle.x = game.input.x || game.world.width*0.5;
+        }
     }
 
     function initBricks() {
@@ -139,7 +149,8 @@
                 count_alive++;
             }
         }
-        if (count_alive == 0) {
+        
+        if (count_alive == 1) {
         alert('You won the game, congratulations!');
         location.reload();
         }
@@ -165,6 +176,13 @@
 
     function ballHitPaddle(ball, paddle) {
         ball.animations.play('wobble');
+        ball.body.velocity.x = -1*5*(paddle.x-ball.x);
+    }
+
+    function startGame() {
+        startButton.destroy();
+        ball.body.velocity.set(150, -150);
+        playing = true;
     }
     
 </script>
